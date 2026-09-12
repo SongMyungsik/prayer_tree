@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 
 import '../models/prayer_category.dart';
@@ -156,6 +158,42 @@ class PrayerStore extends ChangeNotifier {
   Future<void> deleteProgressUpdate(int id) async {
     final db = await DbHelper.instance.database;
     await db.delete('updates', where: 'id = ?', whereArgs: [id]);
+    await load();
+  }
+
+  Future<String> exportBackupJson() async {
+    final payload = {
+      'app': 'prayer_tree',
+      'backupVersion': 1,
+      'exportedAt': _nowIso(),
+      'categories': categories.map((c) => c.toMap()).toList(),
+      'items': items.map((i) => i.toMap()).toList(),
+      'updates': updates.map((u) => u.toMap()).toList(),
+    };
+    return const JsonEncoder.withIndent('  ').convert(payload);
+  }
+
+  Future<void> restoreBackupJson(String jsonStr) async {
+    final data = jsonDecode(jsonStr) as Map<String, dynamic>;
+    final categoryRows = (data['categories'] as List).cast<Map<String, dynamic>>();
+    final itemRows = (data['items'] as List).cast<Map<String, dynamic>>();
+    final updateRows = (data['updates'] as List).cast<Map<String, dynamic>>();
+
+    final db = await DbHelper.instance.database;
+    await db.transaction((txn) async {
+      await txn.delete('updates');
+      await txn.delete('items');
+      await txn.delete('categories');
+      for (final row in categoryRows) {
+        await txn.insert('categories', Map<String, Object?>.from(row));
+      }
+      for (final row in itemRows) {
+        await txn.insert('items', Map<String, Object?>.from(row));
+      }
+      for (final row in updateRows) {
+        await txn.insert('updates', Map<String, Object?>.from(row));
+      }
+    });
     await load();
   }
 }
