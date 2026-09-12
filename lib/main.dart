@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data/prayer_store.dart';
 import 'screens/category_manage_screen.dart';
@@ -10,6 +11,9 @@ import 'screens/search_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/stats_screen.dart';
 import 'theme/app_theme.dart';
+import 'widgets/tutorial_dialog.dart';
+
+const _tutorialSeenKey = 'tutorial_seen';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,6 +58,15 @@ class _HomeShellState extends State<HomeShell> {
   void initState() {
     super.initState();
     _store.load();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowTutorial());
+  }
+
+  Future<void> _maybeShowTutorial() async {
+    final prefs = await SharedPreferences.getInstance();
+    final seen = prefs.getBool(_tutorialSeenKey) ?? false;
+    if (seen || !mounted) return;
+    await showDialog<void>(context: context, builder: (_) => const TutorialDialog());
+    await prefs.setBool(_tutorialSeenKey, true);
   }
 
   @override

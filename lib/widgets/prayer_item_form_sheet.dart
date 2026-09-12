@@ -101,19 +101,19 @@ class _PrayerItemFormSheetState extends State<_PrayerItemFormSheet> {
             ),
             const SizedBox(height: 12),
             TextField(
-              controller: _contentCtrl,
+              controller: _personCtrl,
               autofocus: true,
+              decoration: const InputDecoration(labelText: '이름 (선택)', hintText: '이름 또는 관계'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _contentCtrl,
               minLines: 2,
               maxLines: 6,
               decoration: const InputDecoration(
                 labelText: '내용 *',
                 hintText: '예: OO 집사님 건강 회복을 위해 기도해주세요',
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _personCtrl,
-              decoration: const InputDecoration(labelText: '대상자 (선택)', hintText: '이름 또는 관계'),
             ),
             const SizedBox(height: 20),
             FilledButton(

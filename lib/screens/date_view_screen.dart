@@ -3,8 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 import '../data/prayer_store.dart';
 import '../models/progress_update.dart';
-import '../widgets/category_pill.dart';
-import 'item_detail_screen.dart';
+import '../widgets/prayer_item_card.dart';
 
 class DateViewScreen extends StatefulWidget {
   final PrayerStore store;
@@ -30,7 +29,18 @@ class _DateViewScreenState extends State<DateViewScreen> {
       byDate.putIfAbsent(u.date, () => []).add(u);
     }
 
-    final selectedEntries = byDate[_key(_selectedDay)] ?? const <ProgressUpdate>[];
+    final selectedKey = _key(_selectedDay);
+    final updatesToday = byDate[selectedKey] ?? const <ProgressUpdate>[];
+    final updatesByItemId = <int, List<ProgressUpdate>>{};
+    for (final u in updatesToday) {
+      updatesByItemId.putIfAbsent(u.itemId, () => []).add(u);
+    }
+    final relatedItemIds = <int>{
+      for (final item in store.items)
+        if (item.createdAt.startsWith(selectedKey)) item.id!,
+      ...updatesToday.map((u) => u.itemId),
+    };
+    final relatedItems = store.items.where((i) => relatedItemIds.contains(i.id)).toList();
 
     return Scaffold(
       body: SafeArea(
@@ -93,54 +103,43 @@ class _DateViewScreenState extends State<DateViewScreen> {
             ),
             const Divider(height: 1),
             Expanded(
-              child: selectedEntries.isEmpty
+              child: relatedItems.isEmpty
                   ? Center(
                       child: Text(
-                        '${_key(_selectedDay)}에 기록된 진행 상황이 없습니다.',
+                        '$selectedKey에 해당하는 기도 제목이 없습니다.',
                         style: TextStyle(color: Colors.grey[500]),
                       ),
                     )
                   : ListView.separated(
                       padding: const EdgeInsets.all(16),
-                      itemCount: selectedEntries.length,
+                      itemCount: relatedItems.length,
                       separatorBuilder: (_, _) => const SizedBox(height: 10),
                       itemBuilder: (context, index) {
-                        final u = selectedEntries[index];
-                        final item = store.itemById(u.itemId);
-                        final category = item != null ? store.categoryById(item.categoryId) : null;
-                        return InkWell(
-                          borderRadius: BorderRadius.circular(14),
-                          onTap: item == null
-                              ? null
-                              : () => Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => ItemDetailScreen(itemId: item.id!, store: store),
-                                    ),
-                                  ),
-                          child: Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          item?.title ?? '(삭제된 항목)',
-                                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        final item = relatedItems[index];
+                        final records = updatesByItemId[item.id] ?? const <ProgressUpdate>[];
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            PrayerItemCard(item: item, store: store),
+                            if (records.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: records
+                                      .map(
+                                        (u) => Padding(
+                                          padding: const EdgeInsets.only(bottom: 2),
+                                          child: Text(
+                                            '• ${u.content}',
+                                            style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                                          ),
                                         ),
-                                      ),
-                                      if (category != null)
-                                        CategoryPill(name: category.name, color: Color(category.color)),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(u.content, style: TextStyle(color: Colors.grey[700])),
-                                ],
+                                      )
+                                      .toList(),
+                                ),
                               ),
-                            ),
-                          ),
+                          ],
                         );
                       },
                     ),

@@ -27,7 +27,7 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
-  bool get _hasFilter =>
+  bool get _hasActiveFilter =>
       _categoryFilter != null ||
       _statusFilter != null ||
       _dateFilter != null ||
@@ -62,18 +62,16 @@ class _SearchScreenState extends State<SearchScreen> {
     final person = _personCtrl.text.trim().toLowerCase();
     final dateKey = _dateFilter == null ? null : DateFormat('yyyy-MM-dd').format(_dateFilter!);
 
-    final results = _hasFilter
-        ? store.items.where((item) {
-            final matchesCategory = _categoryFilter == null || item.categoryId == _categoryFilter;
-            final matchesStatus = _statusFilter == null || item.status == _statusFilter;
-            final matchesPerson =
-                person.isEmpty || (item.personName?.toLowerCase().contains(person) ?? false);
-            final matchesDate = dateKey == null ||
-                item.createdAt.startsWith(dateKey) ||
-                store.updatesForItem(item.id!).any((u) => u.date == dateKey);
-            return matchesCategory && matchesStatus && matchesPerson && matchesDate;
-          }).toList()
-        : const [];
+    final results = store.items.where((item) {
+      final matchesCategory = _categoryFilter == null || item.categoryId == _categoryFilter;
+      final matchesStatus = _statusFilter == null || item.status == _statusFilter;
+      final matchesPerson =
+          person.isEmpty || (item.personName?.toLowerCase().contains(person) ?? false);
+      final matchesDate = dateKey == null ||
+          item.createdAt.startsWith(dateKey) ||
+          store.updatesForItem(item.id!).any((u) => u.date == dateKey);
+      return matchesCategory && matchesStatus && matchesPerson && matchesDate;
+    }).toList();
 
     return Scaffold(
       body: SafeArea(
@@ -95,25 +93,57 @@ class _SearchScreenState extends State<SearchScreen> {
                               ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                       ),
-                      if (_hasFilter)
+                      if (_hasActiveFilter)
                         TextButton(onPressed: _clearFilters, child: const Text('필터 초기화')),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  TextField(
-                    controller: _personCtrl,
-                    onChanged: (_) => setState(() {}),
-                    decoration: InputDecoration(
-                      labelText: '대상자별 검색',
-                      hintText: '이름 또는 관계로 검색',
-                      prefixIcon: const Icon(Icons.person_outline),
-                      suffixIcon: _personCtrl.text.isEmpty
-                          ? null
-                          : IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () => setState(() => _personCtrl.clear()),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _personCtrl,
+                          onChanged: (_) => setState(() {}),
+                          decoration: InputDecoration(
+                            labelText: '대상자별 검색',
+                            prefixIcon: const Icon(Icons.person_outline),
+                            suffixIcon: _personCtrl.text.isEmpty
+                                ? null
+                                : IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () => setState(() => _personCtrl.clear()),
+                                  ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: _pickDate,
+                                icon: const Icon(Icons.calendar_today, size: 16),
+                                label: Text(
+                                  dateKey ?? '날짜 선택',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                ),
+                              ),
                             ),
-                    ),
+                            if (_dateFilter != null)
+                              IconButton(
+                                icon: const Icon(Icons.clear),
+                                visualDensity: VisualDensity.compact,
+                                onPressed: () => setState(() => _dateFilter = null),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   Text('유형별', style: Theme.of(context).textTheme.labelMedium),
@@ -173,50 +203,26 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  Text('날짜별', style: Theme.of(context).textTheme.labelMedium),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: _pickDate,
-                        icon: const Icon(Icons.calendar_today, size: 16),
-                        label: Text(dateKey ?? '날짜 선택'),
-                      ),
-                      if (_dateFilter != null)
-                        IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () => setState(() => _dateFilter = null),
-                        ),
-                    ],
-                  ),
                 ],
               ),
             ),
             const SizedBox(height: 8),
             const Divider(height: 1),
             Expanded(
-              child: !_hasFilter
+              child: results.isEmpty
                   ? Center(
                       child: Text(
-                        '검색 조건을 선택해주세요.',
+                        '검색 결과가 없습니다.',
                         style: TextStyle(color: Colors.grey[500]),
                       ),
                     )
-                  : results.isEmpty
-                      ? Center(
-                          child: Text(
-                            '검색 결과가 없습니다.',
-                            style: TextStyle(color: Colors.grey[500]),
-                          ),
-                        )
-                      : ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
-                          itemCount: results.length,
-                          separatorBuilder: (_, _) => const SizedBox(height: 10),
-                          itemBuilder: (context, index) =>
-                              PrayerItemCard(item: results[index], store: store),
-                        ),
+                  : ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+                      itemCount: results.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) =>
+                          PrayerItemCard(item: results[index], store: store),
+                    ),
             ),
           ],
         ),

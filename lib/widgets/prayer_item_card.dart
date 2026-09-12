@@ -15,6 +15,9 @@ class PrayerItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final category = store.categoryById(item.categoryId);
+    final categoryColor = category != null ? Color(category.color) : null;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InkWell(
       borderRadius: BorderRadius.circular(14),
       onTap: () async {
@@ -23,45 +26,61 @@ class PrayerItemCard extends StatelessWidget {
         );
       },
       child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        color: categoryColor?.withValues(alpha: isDark ? 0.20 : 0.10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: categoryColor?.withValues(alpha: 0.35) ?? const Color(0xFFE6E2EE)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (item.personName != null) ...[
-                          Text(
-                            item.personName!,
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              Container(width: 4, color: categoryColor ?? Colors.transparent),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (item.personName != null) ...[
+                                  Text(
+                                    item.personName!,
+                                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                  ),
+                                  const SizedBox(height: 2),
+                                ],
+                                Text(item.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                                if (item.description != null && item.description!.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    item.description!,
+                                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 2),
+                          StatusBadge(status: item.status),
                         ],
-                        Text(item.title, style: const TextStyle(fontWeight: FontWeight.w600)),
-                        if (item.description != null && item.description!.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            item.description!,
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                      ),
+                      if (category != null) ...[
+                        const SizedBox(height: 8),
+                        CategoryPill(name: category.name, color: categoryColor!),
                       ],
-                    ),
+                    ],
                   ),
-                  StatusBadge(status: item.status),
-                ],
+                ),
               ),
-              if (category != null) ...[
-                const SizedBox(height: 8),
-                CategoryPill(name: category.name, color: Color(category.color)),
-              ],
             ],
           ),
         ),
