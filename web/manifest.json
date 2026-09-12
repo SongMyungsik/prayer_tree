@@ -1,11 +1,11 @@
 {
-    "name": "prayer_tree",
-    "short_name": "prayer_tree",
+    "name": "기도 나무",
+    "short_name": "기도 나무",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FAF9FC",
+    "theme_color": "#7C5CBF",
+    "description": "중보기도 리스트를 유형별로 분류하고 진행 상황을 기록하는 앱",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

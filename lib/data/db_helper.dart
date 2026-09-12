@@ -1,10 +1,7 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
-// ignore: unnecessary_import
-import 'package:sqflite/sqflite.dart'; // sets the default (mobile) databaseFactory as a side effect
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+import 'platform_factory_io.dart' if (dart.library.html) 'platform_factory_web.dart';
 
 const List<Map<String, Object>> defaultCategories = [
   {'name': '환우', 'color': 0xFFE0708A},
@@ -27,13 +24,7 @@ class DbHelper {
   }
 
   Future<Database> _open() async {
-    final DatabaseFactory factory;
-    if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
-      sqfliteFfiInit();
-      factory = databaseFactoryFfi;
-    } else {
-      factory = databaseFactory;
-    }
+    final factory = resolveDatabaseFactory();
 
     final dbPath = await factory.getDatabasesPath();
     final path = join(dbPath, 'prayer_tree.db');
