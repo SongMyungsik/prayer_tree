@@ -118,7 +118,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                   categoryId: result.categoryId,
                                   title: result.title,
                                   personName: result.personName,
-                                  description: result.description,
                                 );
                               }
                             },

@@ -7,13 +7,11 @@ class PrayerItemFormResult {
   final int categoryId;
   final String title;
   final String? personName;
-  final String? description;
 
   PrayerItemFormResult({
     required this.categoryId,
     required this.title,
     this.personName,
-    this.description,
   });
 }
 
@@ -48,24 +46,28 @@ class _PrayerItemFormSheet extends StatefulWidget {
 
 class _PrayerItemFormSheetState extends State<_PrayerItemFormSheet> {
   late int _categoryId;
-  late final TextEditingController _titleCtrl;
+  late final TextEditingController _contentCtrl;
   late final TextEditingController _personCtrl;
-  late final TextEditingController _descCtrl;
 
   @override
   void initState() {
     super.initState();
     _categoryId = widget.initial?.categoryId ?? widget.initialCategoryId ?? widget.categories.first.id!;
-    _titleCtrl = TextEditingController(text: widget.initial?.title ?? '');
+    _contentCtrl = TextEditingController(text: _initialContent(widget.initial));
     _personCtrl = TextEditingController(text: widget.initial?.personName ?? '');
-    _descCtrl = TextEditingController(text: widget.initial?.description ?? '');
+  }
+
+  String _initialContent(PrayerItem? initial) {
+    if (initial == null) return '';
+    final description = initial.description?.trim();
+    if (description == null || description.isEmpty) return initial.title;
+    return '${initial.title}\n$description';
   }
 
   @override
   void dispose() {
-    _titleCtrl.dispose();
+    _contentCtrl.dispose();
     _personCtrl.dispose();
-    _descCtrl.dispose();
     super.dispose();
   }
 
@@ -99,33 +101,30 @@ class _PrayerItemFormSheetState extends State<_PrayerItemFormSheet> {
             ),
             const SizedBox(height: 12),
             TextField(
-              controller: _titleCtrl,
+              controller: _contentCtrl,
               autofocus: true,
-              decoration: const InputDecoration(labelText: '제목 *', hintText: '예: OO 집사님 건강 회복'),
+              minLines: 2,
+              maxLines: 6,
+              decoration: const InputDecoration(
+                labelText: '내용 *',
+                hintText: '예: OO 집사님 건강 회복을 위해 기도해주세요',
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _personCtrl,
               decoration: const InputDecoration(labelText: '대상자 (선택)', hintText: '이름 또는 관계'),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _descCtrl,
-              minLines: 2,
-              maxLines: 4,
-              decoration: const InputDecoration(labelText: '설명 (선택)', hintText: '기도 배경, 상황 등을 적어주세요'),
-            ),
             const SizedBox(height: 20),
             FilledButton(
               onPressed: () {
-                final title = _titleCtrl.text.trim();
-                if (title.isEmpty) return;
+                final content = _contentCtrl.text.trim();
+                if (content.isEmpty) return;
                 Navigator.of(context).pop(
                   PrayerItemFormResult(
                     categoryId: _categoryId,
-                    title: title,
+                    title: content,
                     personName: _personCtrl.text.trim().isEmpty ? null : _personCtrl.text.trim(),
-                    description: _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim(),
                   ),
                 );
               },

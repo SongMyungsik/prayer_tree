@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import '../theme/app_theme.dart';
 
+const _appPassword = '0691';
+
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
@@ -62,18 +64,14 @@ class SplashScreen extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
-                          onPressed: () {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (_) => const HomeShell()),
-                            );
-                          },
+                          onPressed: () => _showPasswordDialog(context),
                           style: FilledButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text('시작하기'),
+                          child: const Text('비번입력'),
                         ),
                       ),
                     ],
@@ -93,6 +91,70 @@ class SplashScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _showPasswordDialog(BuildContext context) async {
+    final unlocked = await showDialog<bool>(
+      context: context,
+      builder: (_) => const _PasswordDialog(),
+    );
+    if (unlocked == true && context.mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomeShell()),
+      );
+    }
+  }
+}
+
+class _PasswordDialog extends StatefulWidget {
+  const _PasswordDialog();
+
+  @override
+  State<_PasswordDialog> createState() => _PasswordDialogState();
+}
+
+class _PasswordDialogState extends State<_PasswordDialog> {
+  final _controller = TextEditingController();
+  String? _errorText;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_controller.text == _appPassword) {
+      Navigator.of(context).pop(true);
+    } else {
+      setState(() => _errorText = '비밀번호가 올바르지 않습니다.');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('비밀번호 입력'),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        obscureText: true,
+        keyboardType: TextInputType.number,
+        maxLength: 4,
+        decoration: InputDecoration(hintText: '4자리 비밀번호', errorText: _errorText),
+        onChanged: (_) {
+          if (_errorText != null) setState(() => _errorText = null);
+        },
+        onSubmitted: (_) => _submit(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('취소'),
+        ),
+        FilledButton(onPressed: _submit, child: const Text('확인')),
+      ],
     );
   }
 }

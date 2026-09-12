@@ -22,11 +22,15 @@ class _ItemListScreenState extends State<ItemListScreen> {
   @override
   Widget build(BuildContext context) {
     final store = widget.store;
-    final filtered = store.items.where((item) {
+    final matched = store.items.where((item) {
       final matchesCategory = _categoryFilter == null || item.categoryId == _categoryFilter;
       final matchesStatus = _statusFilter == null || item.status == _statusFilter;
       return matchesCategory && matchesStatus;
     }).toList();
+    final filtered = [
+      ...matched.where((item) => item.status == PrayerStatus.urgent),
+      ...matched.where((item) => item.status != PrayerStatus.urgent),
+    ];
 
     return Scaffold(
       body: SafeArea(
@@ -125,7 +129,6 @@ class _ItemListScreenState extends State<ItemListScreen> {
               categoryId: result.categoryId,
               title: result.title,
               personName: result.personName,
-              description: result.description,
             );
           }
         },
