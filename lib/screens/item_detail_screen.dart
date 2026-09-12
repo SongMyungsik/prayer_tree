@@ -160,52 +160,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               const SizedBox(height: 20),
               const Text('진행 기록', style: TextStyle(fontWeight: FontWeight.w700)),
               const SizedBox(height: 10),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      InkWell(
-                        onTap: () async {
-                          final picked = await showDatePicker(
-                            context: context,
-                            initialDate: _selectedDate,
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime(2100),
-                          );
-                          if (picked != null) setState(() => _selectedDate = picked);
-                        },
-                        child: InputDecorator(
-                          decoration: const InputDecoration(labelText: '날짜'),
-                          child: Text(_dateLabel),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: _contentCtrl,
-                        minLines: 2,
-                        maxLines: 4,
-                        decoration: const InputDecoration(hintText: '오늘의 기도 진행 상황을 기록해주세요'),
-                      ),
-                      const SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: FilledButton(
-                          onPressed: () async {
-                            final content = _contentCtrl.text.trim();
-                            if (content.isEmpty) return;
-                            await store.addProgressUpdate(item.id!, _dateLabel, content);
-                            _contentCtrl.clear();
-                          },
-                          child: const Text('기록 추가'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
               if (itemUpdates.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -252,6 +206,54 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                     ),
                   ),
                 ),
+              const SizedBox(height: 12),
+              const Text('진행 기록 추가', style: TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 10),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      InkWell(
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: _selectedDate,
+                            firstDate: DateTime(2020),
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null) setState(() => _selectedDate = picked);
+                        },
+                        child: InputDecorator(
+                          decoration: const InputDecoration(labelText: '날짜'),
+                          child: Text(_dateLabel),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _contentCtrl,
+                        minLines: 2,
+                        maxLines: 4,
+                        decoration: const InputDecoration(hintText: '오늘의 기도 진행 상황을 기록해주세요'),
+                      ),
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: FilledButton(
+                          onPressed: () async {
+                            final content = _contentCtrl.text.trim();
+                            if (content.isEmpty) return;
+                            await store.addProgressUpdate(item.id!, _dateLabel, content);
+                            _contentCtrl.clear();
+                          },
+                          child: const Text('기록 추가'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         );
