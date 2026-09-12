@@ -6,6 +6,9 @@ import 'data/prayer_store.dart';
 import 'screens/category_manage_screen.dart';
 import 'screens/date_view_screen.dart';
 import 'screens/item_list_screen.dart';
+import 'screens/search_screen.dart';
+import 'screens/splash_screen.dart';
+import 'screens/stats_screen.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -31,7 +34,7 @@ class PrayerTreeApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const HomeShell(),
+      home: const SplashScreen(),
     );
   }
 }
@@ -71,6 +74,8 @@ class _HomeShellState extends State<HomeShell> {
         final screens = [
           ItemListScreen(store: _store),
           DateViewScreen(store: _store),
+          SearchScreen(store: _store),
+          StatsScreen(store: _store),
           CategoryManageScreen(store: _store),
         ];
 
@@ -85,6 +90,8 @@ class _HomeShellState extends State<HomeShell> {
             destinations: const [
               NavigationDestination(icon: Icon(Icons.list_alt), label: '목록'),
               NavigationDestination(icon: Icon(Icons.calendar_month), label: '날짜별'),
+              NavigationDestination(icon: Icon(Icons.search), label: '검색'),
+              NavigationDestination(icon: Icon(Icons.bar_chart), label: '통계'),
               NavigationDestination(icon: Icon(Icons.category), label: '카테고리'),
             ],
           ),

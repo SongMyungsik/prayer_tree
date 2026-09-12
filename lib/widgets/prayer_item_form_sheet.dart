@@ -21,20 +21,26 @@ Future<PrayerItemFormResult?> showPrayerItemFormSheet(
   BuildContext context, {
   required List<PrayerCategory> categories,
   PrayerItem? initial,
+  int? initialCategoryId,
 }) {
   return showModalBottomSheet<PrayerItemFormResult>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (context) => _PrayerItemFormSheet(categories: categories, initial: initial),
+    builder: (context) => _PrayerItemFormSheet(
+      categories: categories,
+      initial: initial,
+      initialCategoryId: initialCategoryId,
+    ),
   );
 }
 
 class _PrayerItemFormSheet extends StatefulWidget {
   final List<PrayerCategory> categories;
   final PrayerItem? initial;
+  final int? initialCategoryId;
 
-  const _PrayerItemFormSheet({required this.categories, this.initial});
+  const _PrayerItemFormSheet({required this.categories, this.initial, this.initialCategoryId});
 
   @override
   State<_PrayerItemFormSheet> createState() => _PrayerItemFormSheetState();
@@ -49,7 +55,7 @@ class _PrayerItemFormSheetState extends State<_PrayerItemFormSheet> {
   @override
   void initState() {
     super.initState();
-    _categoryId = widget.initial?.categoryId ?? widget.categories.first.id!;
+    _categoryId = widget.initial?.categoryId ?? widget.initialCategoryId ?? widget.categories.first.id!;
     _titleCtrl = TextEditingController(text: widget.initial?.title ?? '');
     _personCtrl = TextEditingController(text: widget.initial?.personName ?? '');
     _descCtrl = TextEditingController(text: widget.initial?.description ?? '');

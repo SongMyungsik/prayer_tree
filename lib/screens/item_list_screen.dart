@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../data/prayer_store.dart';
-import '../models/prayer_item.dart';
 import '../models/prayer_status.dart';
 import '../widgets/category_pill.dart';
+import '../widgets/prayer_item_card.dart';
 import '../widgets/prayer_item_form_sheet.dart';
-import '../widgets/status_badge.dart';
-import 'item_detail_screen.dart';
 
 class ItemListScreen extends StatefulWidget {
   final PrayerStore store;
@@ -106,7 +104,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
                       itemCount: filtered.length,
                       separatorBuilder: (_, _) => const SizedBox(height: 10),
-                      itemBuilder: (context, index) => _ItemCard(
+                      itemBuilder: (context, index) => PrayerItemCard(
                         item: filtered[index],
                         store: store,
                       ),
@@ -117,7 +115,11 @@ class _ItemListScreenState extends State<ItemListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final result = await showPrayerItemFormSheet(context, categories: store.categories);
+          final result = await showPrayerItemFormSheet(
+            context,
+            categories: store.categories,
+            initialCategoryId: _categoryFilter,
+          );
           if (result != null) {
             await store.addItem(
               categoryId: result.categoryId,
@@ -163,57 +165,3 @@ class _StatusFilterChip extends StatelessWidget {
   }
 }
 
-class _ItemCard extends StatelessWidget {
-  final PrayerItem item;
-  final PrayerStore store;
-
-  const _ItemCard({required this.item, required this.store});
-
-  @override
-  Widget build(BuildContext context) {
-    final category = store.categoryById(item.categoryId);
-    return InkWell(
-      borderRadius: BorderRadius.circular(14),
-      onTap: () async {
-        await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => ItemDetailScreen(itemId: item.id!, store: store)),
-        );
-      },
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(item.title, style: const TextStyle(fontWeight: FontWeight.w600)),
-                        if (item.personName != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            item.personName!,
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  StatusBadge(status: item.status),
-                ],
-              ),
-              if (category != null) ...[
-                const SizedBox(height: 8),
-                CategoryPill(name: category.name, color: Color(category.color)),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
