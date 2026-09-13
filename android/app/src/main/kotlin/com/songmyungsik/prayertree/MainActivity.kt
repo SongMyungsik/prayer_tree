@@ -1,4 +1,4 @@
-package com.example.prayer_tree
+package com.songmyungsik.prayertree
 
 import io.flutter.embedding.android.FlutterActivity
 

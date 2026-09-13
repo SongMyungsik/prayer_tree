@@ -50,3 +50,8 @@ app.*.map.json
 
 # Church-specific branding used for internal APK builds only — never publish to GitHub
 /assets/top_image3.png
+
+# Release signing — never commit the upload keystore or its credentials
+/android/key.properties
+/android/*.jks
+/android/*.keystore

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const defaultSeedColor = Color(0xFF7C5CBF);
-const defaultPassword = '0691';
+const defaultPassword = '1234';
 
 const seedColorPresets = [
   defaultSeedColor, // 보라 (기본)
