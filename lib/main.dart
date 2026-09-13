@@ -58,7 +58,10 @@ class _PrayerTreeAppState extends State<PrayerTreeApp> {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          home: SplashScreen(settings: _settings),
+          home: Theme(
+            data: buildLightTheme(seedColor: _settings.seedColor),
+            child: SplashScreen(settings: _settings),
+          ),
         );
       },
     );
