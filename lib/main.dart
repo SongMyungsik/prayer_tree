@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import 'data/app_settings.dart';
 import 'data/prayer_store.dart';
-import 'screens/category_manage_screen.dart';
 import 'screens/date_view_screen.dart';
 import 'screens/item_list_screen.dart';
 import 'screens/search_screen.dart';
+import 'screens/settings_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/stats_screen.dart';
 import 'theme/app_theme.dart';
-import 'widgets/tutorial_dialog.dart';
-
-const _tutorialSeenKey = 'tutorial_seen';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,30 +18,57 @@ Future<void> main() async {
   runApp(const PrayerTreeApp());
 }
 
-class PrayerTreeApp extends StatelessWidget {
+class PrayerTreeApp extends StatefulWidget {
   const PrayerTreeApp({super.key});
 
   @override
+  State<PrayerTreeApp> createState() => _PrayerTreeAppState();
+}
+
+class _PrayerTreeAppState extends State<PrayerTreeApp> {
+  final AppSettings _settings = AppSettings();
+
+  @override
+  void initState() {
+    super.initState();
+    _settings.load();
+  }
+
+  @override
+  void dispose() {
+    _settings.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: '기도 나무',
-      debugShowCheckedModeBanner: false,
-      theme: buildLightTheme(),
-      darkTheme: buildDarkTheme(),
-      locale: const Locale('ko', 'KR'),
-      supportedLocales: const [Locale('ko', 'KR'), Locale('en', 'US')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      home: const SplashScreen(),
+    return AnimatedBuilder(
+      animation: _settings,
+      builder: (context, _) {
+        return MaterialApp(
+          title: '기도 나무',
+          debugShowCheckedModeBanner: false,
+          theme: buildLightTheme(seedColor: _settings.seedColor),
+          darkTheme: buildDarkTheme(seedColor: _settings.seedColor),
+          themeMode: _settings.themeMode,
+          locale: const Locale('ko', 'KR'),
+          supportedLocales: const [Locale('ko', 'KR'), Locale('en', 'US')],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: SplashScreen(settings: _settings),
+        );
+      },
     );
   }
 }
 
 class HomeShell extends StatefulWidget {
-  const HomeShell({super.key});
+  final AppSettings settings;
+
+  const HomeShell({super.key, required this.settings});
 
   @override
   State<HomeShell> createState() => _HomeShellState();
@@ -58,15 +82,6 @@ class _HomeShellState extends State<HomeShell> {
   void initState() {
     super.initState();
     _store.load();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowTutorial());
-  }
-
-  Future<void> _maybeShowTutorial() async {
-    final prefs = await SharedPreferences.getInstance();
-    final seen = prefs.getBool(_tutorialSeenKey) ?? false;
-    if (seen || !mounted) return;
-    await showDialog<void>(context: context, builder: (_) => const TutorialDialog());
-    await prefs.setBool(_tutorialSeenKey, true);
   }
 
   @override
@@ -89,7 +104,7 @@ class _HomeShellState extends State<HomeShell> {
           DateViewScreen(store: _store),
           SearchScreen(store: _store),
           StatsScreen(store: _store),
-          CategoryManageScreen(store: _store),
+          SettingsScreen(store: _store, settings: widget.settings),
         ];
 
         return Scaffold(
@@ -105,7 +120,7 @@ class _HomeShellState extends State<HomeShell> {
               NavigationDestination(icon: Icon(Icons.calendar_month), label: '날짜별'),
               NavigationDestination(icon: Icon(Icons.search), label: '검색'),
               NavigationDestination(icon: Icon(Icons.bar_chart), label: '통계'),
-              NavigationDestination(icon: Icon(Icons.category), label: '카테고리'),
+              NavigationDestination(icon: Icon(Icons.settings), label: '설정'),
             ],
           ),
         );

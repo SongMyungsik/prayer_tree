@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 
 import '../data/prayer_store.dart';
 import '../models/prayer_status.dart';
-import '../widgets/category_pill.dart';
 import '../widgets/prayer_item_card.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -106,7 +105,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           controller: _personCtrl,
                           onChanged: (_) => setState(() {}),
                           decoration: InputDecoration(
-                            labelText: '대상자별 검색',
+                            labelText: '이름 검색',
                             prefixIcon: const Icon(Icons.person_outline),
                             suffixIcon: _personCtrl.text.isEmpty
                                 ? null
@@ -119,88 +118,54 @@ class _SearchScreenState extends State<SearchScreen> {
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: _pickDate,
-                                icon: const Icon(Icons.calendar_today, size: 16),
-                                label: Text(
-                                  dateKey ?? '날짜 선택',
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                ),
-                              ),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: _pickDate,
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: '날짜 선택',
+                              prefixIcon: const Icon(Icons.calendar_today, size: 18),
+                              suffixIcon: _dateFilter == null
+                                  ? null
+                                  : IconButton(
+                                      icon: const Icon(Icons.clear),
+                                      onPressed: () => setState(() => _dateFilter = null),
+                                    ),
                             ),
-                            if (_dateFilter != null)
-                              IconButton(
-                                icon: const Icon(Icons.clear),
-                                visualDensity: VisualDensity.compact,
-                                onPressed: () => setState(() => _dateFilter = null),
-                              ),
+                            child: Text(dateKey ?? '', overflow: TextOverflow.ellipsis),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<int?>(
+                          initialValue: _categoryFilter,
+                          decoration: const InputDecoration(labelText: '유형별'),
+                          items: [
+                            const DropdownMenuItem(value: null, child: Text('전체')),
+                            for (final c in store.categories)
+                              DropdownMenuItem(value: c.id, child: Text(c.name)),
                           ],
+                          onChanged: (v) => setState(() => _categoryFilter = v),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text('유형별', style: Theme.of(context).textTheme.labelMedium),
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      GestureDetector(
-                        onTap: () => setState(() => _categoryFilter = null),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: _categoryFilter == null
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.transparent,
-                            border: Border.all(color: const Color(0xFFE6E2EE)),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            '전체',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: _categoryFilter == null ? Colors.white : Colors.grey[600],
-                            ),
-                          ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: DropdownButtonFormField<PrayerStatus?>(
+                          initialValue: _statusFilter,
+                          decoration: const InputDecoration(labelText: '상태별'),
+                          items: [
+                            const DropdownMenuItem(value: null, child: Text('전체')),
+                            for (final s in PrayerStatus.values)
+                              DropdownMenuItem(value: s, child: Text(s.label)),
+                          ],
+                          onChanged: (v) => setState(() => _statusFilter = v),
                         ),
                       ),
-                      for (final c in store.categories)
-                        GestureDetector(
-                          onTap: () => setState(() => _categoryFilter = c.id),
-                          child: CategoryPill(
-                            name: c.name,
-                            color: Color(c.color),
-                            selected: _categoryFilter == c.id,
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text('상태별', style: Theme.of(context).textTheme.labelMedium),
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 4,
-                    children: [
-                      _FilterChip(
-                        label: '전체',
-                        selected: _statusFilter == null,
-                        onTap: () => setState(() => _statusFilter = null),
-                      ),
-                      for (final s in PrayerStatus.values)
-                        _FilterChip(
-                          label: s.label,
-                          selected: _statusFilter == s,
-                          onTap: () => setState(() => _statusFilter = s),
-                        ),
                     ],
                   ),
                 ],
@@ -231,32 +196,3 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 }
 
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _FilterChip({required this.label, required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.12) : null,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: selected ? Theme.of(context).colorScheme.primary : Colors.grey[600],
-          ),
-        ),
-      ),
-    );
-  }
-}

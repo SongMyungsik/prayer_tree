@@ -5,17 +5,33 @@ const answeredColor = Color(0xFF3F9B6C);
 const pausedColor = Color(0xFFB9862F);
 const dangerColor = Color(0xFFC0526A);
 
-ThemeData buildLightTheme() {
-  final scheme = ColorScheme.fromSeed(seedColor: accentColor, brightness: Brightness.light);
+ThemeData buildLightTheme({Color seedColor = accentColor}) {
+  final scheme = ColorScheme.fromSeed(seedColor: seedColor, brightness: Brightness.light);
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
     scaffoldBackgroundColor: const Color(0xFFFAF9FC),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.white,
-      foregroundColor: Color(0xFF2C2733),
+    appBarTheme: AppBarTheme(
+      backgroundColor: scheme.primaryContainer,
+      foregroundColor: scheme.onPrimaryContainer,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: scheme.primaryContainer.withValues(alpha: 0.5),
+      indicatorColor: scheme.primary,
+      iconTheme: WidgetStateProperty.resolveWith(
+        (states) => IconThemeData(
+          color: states.contains(WidgetState.selected) ? scheme.onPrimary : scheme.onSurfaceVariant,
+        ),
+      ),
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (states) => TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: states.contains(WidgetState.selected) ? scheme.primary : scheme.onSurfaceVariant,
+        ),
+      ),
     ),
     cardTheme: const CardThemeData(
       color: Colors.white,
@@ -38,17 +54,33 @@ ThemeData buildLightTheme() {
   );
 }
 
-ThemeData buildDarkTheme() {
-  final scheme = ColorScheme.fromSeed(seedColor: accentColor, brightness: Brightness.dark);
+ThemeData buildDarkTheme({Color seedColor = accentColor}) {
+  final scheme = ColorScheme.fromSeed(seedColor: seedColor, brightness: Brightness.dark);
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
     scaffoldBackgroundColor: const Color(0xFF1A1720),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFF241F2C),
-      foregroundColor: Color(0xFFF1EEF6),
+    appBarTheme: AppBarTheme(
+      backgroundColor: scheme.surfaceContainerHigh,
+      foregroundColor: scheme.onSurface,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: scheme.surfaceContainerHigh,
+      indicatorColor: scheme.primary,
+      iconTheme: WidgetStateProperty.resolveWith(
+        (states) => IconThemeData(
+          color: states.contains(WidgetState.selected) ? scheme.onPrimary : scheme.onSurfaceVariant,
+        ),
+      ),
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (states) => TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: states.contains(WidgetState.selected) ? scheme.primary : scheme.onSurfaceVariant,
+        ),
+      ),
     ),
     cardTheme: const CardThemeData(
       color: Color(0xFF241F2C),

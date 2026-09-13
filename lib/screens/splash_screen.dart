@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../data/app_settings.dart';
 import '../main.dart';
 import '../theme/app_theme.dart';
 
-const _appPassword = '0691';
-
 class SplashScreen extends StatelessWidget {
-  const SplashScreen({super.key});
+  final AppSettings settings;
+
+  const SplashScreen({super.key, required this.settings});
 
   @override
   Widget build(BuildContext context) {
@@ -97,18 +98,20 @@ class SplashScreen extends StatelessWidget {
   Future<void> _showPasswordDialog(BuildContext context) async {
     final unlocked = await showDialog<bool>(
       context: context,
-      builder: (_) => const _PasswordDialog(),
+      builder: (_) => _PasswordDialog(settings: settings),
     );
     if (unlocked == true && context.mounted) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeShell()),
+        MaterialPageRoute(builder: (_) => HomeShell(settings: settings)),
       );
     }
   }
 }
 
 class _PasswordDialog extends StatefulWidget {
-  const _PasswordDialog();
+  final AppSettings settings;
+
+  const _PasswordDialog({required this.settings});
 
   @override
   State<_PasswordDialog> createState() => _PasswordDialogState();
@@ -125,7 +128,7 @@ class _PasswordDialogState extends State<_PasswordDialog> {
   }
 
   void _submit() {
-    if (_controller.text == _appPassword) {
+    if (_controller.text == widget.settings.password) {
       Navigator.of(context).pop(true);
     } else {
       setState(() => _errorText = '비밀번호가 올바르지 않습니다.');

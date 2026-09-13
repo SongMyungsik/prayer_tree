@@ -50,10 +50,19 @@ class PrayerItemCard extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (item.personName != null) ...[
-                                  Text(
-                                    item.personName!,
-                                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                if (item.personName != null || category != null) ...[
+                                  Row(
+                                    children: [
+                                      if (item.personName != null)
+                                        Text(
+                                          item.personName!,
+                                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                        ),
+                                      if (item.personName != null && category != null)
+                                        const SizedBox(width: 6),
+                                      if (category != null)
+                                        CategoryPill(name: category.name, color: categoryColor!),
+                                    ],
                                   ),
                                   const SizedBox(height: 2),
                                 ],
@@ -73,10 +82,6 @@ class PrayerItemCard extends StatelessWidget {
                           StatusBadge(status: item.status),
                         ],
                       ),
-                      if (category != null) ...[
-                        const SizedBox(height: 8),
-                        CategoryPill(name: category.name, color: categoryColor!),
-                      ],
                     ],
                   ),
                 ),
