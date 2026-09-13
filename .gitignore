@@ -47,3 +47,6 @@ app.*.map.json
 # sqflite_common_ffi_web binaries (regenerated via `dart run sqflite_common_ffi_web:setup`)
 /web/sqflite_sw.js
 /web/sqlite3.wasm
+
+# Church-specific branding used for internal APK builds only — never publish to GitHub
+/assets/top_image3.png
